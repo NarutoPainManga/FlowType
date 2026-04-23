@@ -1,0 +1,19 @@
+# macOS
+.DS_Store
+
+# Xcode
+DerivedData/
+build/
+*.xcuserstate
+xcuserdata/
+
+# Swift Package Manager
+.build/
+
+# Local editor files
+.vscode/
+.idea/
+
+# Local logs and archives
+*.log
+*.xcarchive

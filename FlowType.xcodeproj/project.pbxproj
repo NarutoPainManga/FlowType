@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		A95B98502F99CDE400DD7DAE /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = A95B984F2F99CDE400DD7DAE /* Supabase */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		A95B98042F99CB3B00DD7DAE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -65,6 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A95B98502F99CDE400DD7DAE /* Supabase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -125,6 +130,7 @@
 			);
 			name = FlowType;
 			packageProductDependencies = (
+				A95B984F2F99CDE400DD7DAE /* Supabase */,
 			);
 			productName = FlowType;
 			productReference = A95B97F22F99CB3A00DD7DAE /* FlowType.app */;
@@ -208,6 +214,9 @@
 			);
 			mainGroup = A95B97E92F99CB3A00DD7DAE;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				A95B984E2F99CDE400DD7DAE /* XCRemoteSwiftPackageReference "supabase-swift" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = A95B97F32F99CB3A00DD7DAE /* Products */;
 			projectDirPath = "";
@@ -595,6 +604,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		A95B984E2F99CDE400DD7DAE /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A95B984F2F99CDE400DD7DAE /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A95B984E2F99CDE400DD7DAE /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = A95B97EA2F99CB3A00DD7DAE /* Project object */;
 }
