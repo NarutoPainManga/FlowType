@@ -8,10 +8,11 @@ This document turns FlowType's launch materials into a field-by-field App Store 
 
 - App name candidate: `FlowType`
 - Bundle identifier detected from the built app: `Kr3-Precision-Creations.FlowType`
-- Privacy Policy URL: publish from `docs/privacy.html`
-- Terms URL: publish from `docs/terms.html`
-- Support URL: publish from `docs/support.html`
+- Privacy Policy URL: `https://narutopainmanga.github.io/FlowType/privacy.html`
+- Terms URL: `https://narutopainmanga.github.io/FlowType/terms.html`
+- Support URL: `https://narutopainmanga.github.io/FlowType/support.html`
 - Seeded screenshots generated locally in `marketing/screenshots`
+- Public GitHub Pages docs are live
 
 ## App information
 
@@ -22,6 +23,8 @@ Use these values unless you decide to rebrand before submission.
 - Category: `Productivity`
 - Secondary category: leave blank unless you want `Business`
 - Content rights: confirm you own the branding and app assets
+- Privacy Policy URL: `https://narutopainmanga.github.io/FlowType/privacy.html`
+- Support URL: `https://narutopainmanga.github.io/FlowType/support.html`
 
 Apple limits the app name to 30 characters and the subtitle to 30 characters.
 
@@ -66,13 +69,11 @@ Paste this into the App Review notes field:
 
 Use public hosted URLs, not local files.
 
-Recommended GitHub Pages URLs after publishing:
+Recommended GitHub Pages URLs:
 
 - Privacy Policy: `https://narutopainmanga.github.io/FlowType/privacy.html`
 - Terms of Service: `https://narutopainmanga.github.io/FlowType/terms.html`
 - Support: `https://narutopainmanga.github.io/FlowType/support.html`
-
-Before submission, replace placeholder contact text in the docs pages with a real public support email or website.
 
 ## Screenshots
 
@@ -159,7 +160,6 @@ Do not claim accessibility support you have not tested on device.
 
 ## Common rejection risks for FlowType
 
-- Placeholder support or privacy contact info left in public pages
 - Metadata claiming keyboard-like or system-wide behavior the app does not have
 - Broken external links in the app or App Store listing
 - Account deletion not behaving clearly during review
@@ -168,11 +168,10 @@ Do not claim accessibility support you have not tested on device.
 
 ## Submission order
 
-1. Publish GitHub Pages for the `docs/` folder.
-2. Replace placeholder contact text with a real public contact method.
-3. Upload polished screenshots.
-4. Enter App Privacy responses.
-5. Fill App Accessibility labels only for features you have verified.
-6. Upload build to TestFlight.
-7. Test on a real iPhone once more.
-8. Submit with the review notes above.
+1. Upload polished screenshots.
+2. Enter the live Privacy Policy and Support URLs above in App Store Connect.
+3. Enter App Privacy responses.
+4. Fill App Accessibility labels only for features you have verified.
+5. Upload build to TestFlight.
+6. Test on a real iPhone once more.
+7. Submit with the review notes above.

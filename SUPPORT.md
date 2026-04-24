@@ -39,4 +39,10 @@ FlowType turns short voice notes into polished writing for email, Slack, notes, 
 
 ## Contact
 
-Add a public support email, contact form, or website here before using this page publicly in the App Store.
+Use the published support page for App Store support:
+
+- `https://narutopainmanga.github.io/FlowType/support.html`
+
+You can also open an issue on the public repository:
+
+- `https://github.com/NarutoPainManga/FlowType/issues`
