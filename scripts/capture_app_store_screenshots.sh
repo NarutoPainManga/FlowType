@@ -8,6 +8,7 @@ APP_PATH="$DERIVED_DATA/Build/Products/Debug-iphonesimulator/FlowType.app"
 OUTPUT_DIR="${1:-/Users/pain/Documents/flowtype/FlowType/marketing/screenshots}"
 DEVICE_NAME="${DEVICE_NAME:-iPhone 17}"
 DEVICE_UDID=""
+BUNDLE_ID=""
 
 boot_device() {
   DEVICE_UDID="$(xcrun simctl list devices available | awk -F '[()]' -v name="$DEVICE_NAME" '$1 ~ "^[[:space:]]*" name " $" { print $2; exit }')"
@@ -27,16 +28,22 @@ build_app() {
     -destination "platform=iOS Simulator,name=$DEVICE_NAME" \
     -derivedDataPath "$DERIVED_DATA" \
     build
+
+  BUNDLE_ID="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP_PATH/Info.plist")"
+  if [[ -z "$BUNDLE_ID" ]]; then
+    echo "Could not read bundle identifier from $APP_PATH/Info.plist"
+    exit 1
+  fi
 }
 
 launch_and_capture() {
   local scene="$1"
   local file="$2"
 
-  xcrun simctl terminate "$DEVICE_UDID" com.pain.FlowType >/dev/null 2>&1 || true
-  xcrun simctl uninstall "$DEVICE_UDID" com.pain.FlowType >/dev/null 2>&1 || true
+  xcrun simctl terminate "$DEVICE_UDID" "$BUNDLE_ID" >/dev/null 2>&1 || true
+  xcrun simctl uninstall "$DEVICE_UDID" "$BUNDLE_ID" >/dev/null 2>&1 || true
   xcrun simctl install "$DEVICE_UDID" "$APP_PATH"
-  xcrun simctl launch "$DEVICE_UDID" com.pain.FlowType \
+  xcrun simctl launch "$DEVICE_UDID" "$BUNDLE_ID" \
     FLOWTYPE_RESET_STATE=1 \
     FLOWTYPE_USE_MOCK_SERVICES=1 \
     FLOWTYPE_SKIP_ONBOARDING=1 \
