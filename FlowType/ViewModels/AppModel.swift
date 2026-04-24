@@ -9,6 +9,12 @@ final class AppModel: ObservableObject {
         static let localSessions = "flowtype.localSessions"
     }
 
+    static let defaultUsageSnapshot = UsageSnapshot(
+        weeklyDictationLimit: 30,
+        usedDictations: 0,
+        resetsAt: Calendar.current.date(byAdding: .day, value: 7, to: .now) ?? .now
+    )
+
     @Published var hasCompletedOnboarding = false
     @Published var selectedMode: FlowMode = .email
     @Published var favoriteModes: [FlowMode] = [.email, .slack, .taskList]
@@ -20,14 +26,11 @@ final class AppModel: ObservableObject {
     @Published var processingMessage = "Polishing..."
     @Published var isShowingPaywall = false
     @Published var errorMessage: String?
-    @Published var usageSnapshot = UsageSnapshot(
-        weeklyDictationLimit: 30,
-        usedDictations: 0,
-        resetsAt: Calendar.current.date(byAdding: .day, value: 7, to: .now) ?? .now
-    )
+    @Published var usageSnapshot = AppModel.defaultUsageSnapshot
     @Published var authSession: AuthSession?
     @Published var setupStatus = SetupStatusSnapshot.placeholder
     @Published var isRefreshingSetupStatus = false
+    @Published var isDeletingAccount = false
 
     private let services: FlowTypeServices
 
@@ -261,6 +264,36 @@ final class AppModel: ObservableObject {
     func clearLocalHistory() {
         sessions = []
         persistSessions()
+    }
+
+    func deleteAnonymousAccount() {
+        guard !isDeletingAccount else { return }
+        isDeletingAccount = true
+
+        Task {
+            do {
+                try await services.account.deleteCurrentAccount()
+                try? await services.auth.signOut()
+
+                await MainActor.run {
+                    self.authSession = nil
+                    self.sessions = []
+                    self.currentTranscript = ""
+                    self.currentPolishedText = ""
+                    self.errorMessage = nil
+                    self.usageSnapshot = AppModel.defaultUsageSnapshot
+                    self.isShowingPaywall = false
+                    self.persistSessions()
+                    self.isDeletingAccount = false
+                    self.refreshSetupStatus()
+                }
+            } catch {
+                await MainActor.run {
+                    self.isDeletingAccount = false
+                    self.errorMessage = error.localizedDescription
+                }
+            }
+        }
     }
 
     static func resetLocalState() {

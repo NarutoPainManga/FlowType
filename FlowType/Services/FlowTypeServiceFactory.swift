@@ -28,6 +28,10 @@ enum FlowTypeServiceFactory {
 
         return FlowTypeServices(
             auth: authService,
+            account: RemoteAccountService(
+                apiClient: apiClient,
+                authTokenProvider: { try? await authService.currentAccessToken() }
+            ),
             audioCapture: audioCapture,
             transcription: RemoteTranscriptionService(
                 apiClient: apiClient,
@@ -62,6 +66,7 @@ enum FlowTypeServiceFactory {
 
         return FlowTypeServices(
             auth: authService,
+            account: UnavailableAccountService(reason: reason),
             audioCapture: audioCapture,
             transcription: UnavailableTranscriptionService(reason: reason),
             polish: UnavailablePolishService(reason: reason),

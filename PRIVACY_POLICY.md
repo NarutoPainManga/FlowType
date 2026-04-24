@@ -42,6 +42,7 @@ FlowType may share data with service providers only as needed to operate transcr
 
 - You can deny microphone access, although recording will not work without it.
 - You can clear recent drafts saved on your device from inside the app.
+- You can delete the current anonymous FlowType account from inside the app when backend deletion support is available.
 - You can stop using the service at any time.
 
 ## Contact

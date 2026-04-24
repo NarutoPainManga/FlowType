@@ -33,6 +33,7 @@ extension FlowTypeServices {
 
         return FlowTypeServices(
             auth: authService,
+            account: RemoteAccountService(apiClient: apiClient, authTokenProvider: tokenProvider),
             audioCapture: audioCapture,
             transcription: RemoteTranscriptionService(apiClient: apiClient, authTokenProvider: tokenProvider),
             polish: RemotePolishService(apiClient: apiClient, authTokenProvider: tokenProvider),
@@ -63,6 +64,42 @@ struct RemoteAuthService: AuthServicing {
 
     func signInAnonymously() async throws -> AuthSession {
         throw RemoteFlowTypeServiceError.unsupported
+    }
+
+    func signOut() async throws {
+        throw RemoteFlowTypeServiceError.unsupported
+    }
+}
+
+struct RemoteAccountService: AccountServicing {
+    private let apiClient: FlowTypeAPIClientProtocol
+    private let authTokenProvider: @Sendable () async -> String?
+
+    init(
+        apiClient: FlowTypeAPIClientProtocol,
+        authTokenProvider: @escaping @Sendable () async -> String? = { nil }
+    ) {
+        self.apiClient = apiClient
+        self.authTokenProvider = authTokenProvider
+    }
+
+    func deleteCurrentAccount() async throws {
+        let response = try await apiClient.send(
+            FlowTypeAPIRequest(
+                path: "account",
+                method: "DELETE",
+                headers: await authorizationHeader()
+            )
+        )
+
+        guard (200..<300).contains(response.statusCode) else {
+            throw response.remoteError
+        }
+    }
+
+    private func authorizationHeader() async -> [String: String] {
+        guard let token = await authTokenProvider() else { return [:] }
+        return ["Authorization": "Bearer \(token)"]
     }
 }
 

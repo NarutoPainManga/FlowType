@@ -26,6 +26,12 @@ FlowType turns short voice notes into polished writing for email, Slack, notes, 
 - If you cleared local drafts, they will no longer appear.
 - If the app was interrupted before processing finished, the draft may not have been saved.
 
+### I want to delete my anonymous account
+
+- Open `Help & Status` in the app.
+- Use `Delete Anonymous Account` to remove the current anonymous account and clear recent drafts on this iPhone.
+- The next time you use FlowType, the app can create a new anonymous account.
+
 ### The rewrite is wrong
 
 - Review and edit the output before sending it.

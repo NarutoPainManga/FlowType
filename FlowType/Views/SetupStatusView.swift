@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SetupStatusView: View {
     @EnvironmentObject private var appModel: AppModel
+    @State private var isShowingDeleteAccountConfirmation = false
 
     var body: some View {
         List {
@@ -65,6 +66,18 @@ struct SetupStatusView: View {
                     .foregroundStyle(.secondary)
             }
 
+            Section("Account") {
+                Button(appModel.isDeletingAccount ? "Deleting Account..." : "Delete Anonymous Account") {
+                    isShowingDeleteAccountConfirmation = true
+                }
+                .foregroundStyle(.red)
+                .disabled(appModel.isDeletingAccount)
+
+                Text("This deletes the current anonymous FlowType account, clears recent drafts on this iPhone, and signs this device out. The next time you use FlowType, a new anonymous account will be created.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+
             Section("Status Checks") {
                 statusRow(title: "App Configuration", item: appModel.setupStatus.configuration)
                 statusRow(title: "Microphone Access", item: appModel.setupStatus.microphone)
@@ -80,6 +93,14 @@ struct SetupStatusView: View {
             }
         }
         .navigationTitle("Help & Status")
+        .alert("Delete Anonymous Account?", isPresented: $isShowingDeleteAccountConfirmation) {
+            Button("Delete Account", role: .destructive) {
+                appModel.deleteAnonymousAccount()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This will delete the current anonymous account and clear recent drafts saved on this iPhone.")
+        }
         .task {
             appModel.refreshSetupStatus()
         }

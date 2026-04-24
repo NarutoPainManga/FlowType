@@ -35,6 +35,10 @@ struct SupabaseAuthService: AuthServicing {
         return AuthSession(session: session)
     }
 
+    func signOut() async throws {
+        try await client.auth.signOut()
+    }
+
     func currentAccessToken() async throws -> String? {
         if let currentSession = client.auth.currentSession {
             return currentSession.accessToken
@@ -62,6 +66,10 @@ private extension AuthSession {
 struct SupabaseAuthService: AuthServicing {
     func currentSession() async throws -> AuthSession? { nil }
     func signInAnonymously() async throws -> AuthSession {
+        throw FlowTypeConfigurationError.supabaseSDKUnavailable
+    }
+
+    func signOut() async throws {
         throw FlowTypeConfigurationError.supabaseSDKUnavailable
     }
 

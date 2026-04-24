@@ -3,6 +3,11 @@ import Foundation
 protocol AuthServicing: Sendable {
     func currentSession() async throws -> AuthSession?
     func signInAnonymously() async throws -> AuthSession
+    func signOut() async throws
+}
+
+protocol AccountServicing: Sendable {
+    func deleteCurrentAccount() async throws
 }
 
 protocol TranscriptionServicing: Sendable {
@@ -38,6 +43,7 @@ protocol SetupDiagnosticsServicing: Sendable {
 
 struct FlowTypeServices: Sendable {
     let auth: AuthServicing
+    let account: AccountServicing
     let audioCapture: AudioCaptureServicing
     let transcription: TranscriptionServicing
     let polish: PolishServicing
@@ -52,6 +58,7 @@ extension FlowTypeServices {
         let state = MockServiceState()
         return FlowTypeServices(
             auth: MockAuthService(state: state),
+            account: MockAccountService(state: state),
             audioCapture: MockAudioCaptureService(),
             transcription: MockTranscriptionService(),
             polish: MockPolishService(),
@@ -88,8 +95,20 @@ actor MockServiceState {
         self.session = session
     }
 
+    func clearSession() {
+        self.session = nil
+    }
+
     func currentUsage() -> UsageSnapshot {
         usage
+    }
+
+    func resetUsage() {
+        usage = UsageSnapshot(
+            weeklyDictationLimit: 30,
+            usedDictations: 0,
+            resetsAt: Calendar.current.date(byAdding: .day, value: 7, to: .now) ?? .now
+        )
     }
 
     func incrementUsage() -> UsageSnapshot {
@@ -108,6 +127,10 @@ actor MockServiceState {
     func saveHistory(_ item: HistoryItem) {
         history.removeAll { $0.id == item.id }
         history.insert(item, at: 0)
+    }
+
+    func clearHistory() {
+        history = []
     }
 }
 
@@ -135,6 +158,24 @@ struct MockAuthService: AuthServicing {
         )
         await state.setSession(session)
         return session
+    }
+
+    func signOut() async throws {
+        await state.clearSession()
+    }
+}
+
+struct MockAccountService: AccountServicing {
+    private let state: MockServiceState
+
+    init(state: MockServiceState = MockServiceState()) {
+        self.state = state
+    }
+
+    func deleteCurrentAccount() async throws {
+        await state.clearHistory()
+        await state.resetUsage()
+        await state.clearSession()
     }
 }
 
@@ -298,6 +339,18 @@ struct UnavailableAuthService: AuthServicing {
     }
 
     func signInAnonymously() async throws -> AuthSession {
+        throw ServiceUnavailableError(reason: reason)
+    }
+
+    func signOut() async throws {
+        throw ServiceUnavailableError(reason: reason)
+    }
+}
+
+struct UnavailableAccountService: AccountServicing {
+    let reason: String
+
+    func deleteCurrentAccount() async throws {
         throw ServiceUnavailableError(reason: reason)
     }
 }
