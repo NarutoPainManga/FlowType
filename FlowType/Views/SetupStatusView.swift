@@ -3,6 +3,15 @@ import SwiftUI
 struct SetupStatusView: View {
     @EnvironmentObject private var appModel: AppModel
     @State private var isShowingDeleteAccountConfirmation = false
+    private let screenshotScenario = ProcessInfo.processInfo.environment["FLOWTYPE_SCREENSHOT_SCENE"] ?? {
+        let arguments = ProcessInfo.processInfo.arguments
+        guard let index = arguments.firstIndex(of: "-FlowTypeScreenshotScene"),
+              arguments.indices.contains(index + 1) else {
+            return nil
+        }
+
+        return arguments[index + 1]
+    }()
 
     var body: some View {
         List {
@@ -105,6 +114,7 @@ struct SetupStatusView: View {
             Text("This will delete the current anonymous account and clear recent drafts saved on this iPhone.")
         }
         .task {
+            guard screenshotScenario == nil else { return }
             appModel.refreshSetupStatus()
         }
     }

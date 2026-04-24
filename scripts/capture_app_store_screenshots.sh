@@ -44,10 +44,9 @@ launch_and_capture() {
   xcrun simctl uninstall "$DEVICE_UDID" "$BUNDLE_ID" >/dev/null 2>&1 || true
   xcrun simctl install "$DEVICE_UDID" "$APP_PATH"
   xcrun simctl launch "$DEVICE_UDID" "$BUNDLE_ID" \
-    FLOWTYPE_RESET_STATE=1 \
-    FLOWTYPE_USE_MOCK_SERVICES=1 \
-    FLOWTYPE_SKIP_ONBOARDING=1 \
-    FLOWTYPE_SCREENSHOT_SCENE="$scene"
+    -FlowTypeResetState \
+    -FlowTypeUseMockServices \
+    -FlowTypeScreenshotScene "$scene"
   sleep 2
   mkdir -p "$OUTPUT_DIR"
   xcrun simctl io "$DEVICE_UDID" screenshot "$OUTPUT_DIR/$file"

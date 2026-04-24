@@ -34,12 +34,14 @@ final class AppModel: ObservableObject {
 
     private let services: FlowTypeServices
 
-    init(services: FlowTypeServices) {
+    init(services: FlowTypeServices, shouldBootstrap: Bool = true) {
         self.services = services
         self.hasCompletedOnboarding = UserDefaults.standard.bool(forKey: StorageKeys.hasCompletedOnboarding)
         self.sessions = Self.loadStoredSessions()
-        Task {
-            await bootstrap()
+        if shouldBootstrap {
+            Task {
+                await bootstrap()
+            }
         }
     }
 
@@ -339,8 +341,8 @@ final class AppModel: ObservableObject {
         switch scenario {
         case "review":
             selectedMode = .email
-            currentTranscript = "hey just left the client call they want the homepage refreshed by friday and they want us to simplify pricing"
-            currentPolishedText = "Quick update from the client call: they would like the homepage refreshed by Friday and want the pricing section simplified. I will send a more detailed recap shortly."
+            currentTranscript = "client wants a friday homepage refresh and simpler pricing"
+            currentPolishedText = "Client update: refresh the homepage by Friday and simplify pricing."
         case "help":
             selectedMode = .meetingNotes
         case "onboarding":
