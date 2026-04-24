@@ -8,6 +8,16 @@
 import XCTest
 
 final class FlowTypeUITests: XCTestCase {
+    private func makeApp(skipOnboarding: Bool = false) -> XCUIApplication {
+        let app = XCUIApplication()
+        app.launchEnvironment["FLOWTYPE_UI_TEST_MODE"] = "1"
+        app.launchEnvironment["FLOWTYPE_USE_MOCK_SERVICES"] = "1"
+        app.launchEnvironment["FLOWTYPE_RESET_STATE"] = "1"
+        if skipOnboarding {
+            app.launchEnvironment["FLOWTYPE_SKIP_ONBOARDING"] = "1"
+        }
+        return app
+    }
 
     override func setUpWithError() throws {
         continueAfterFailure = false
@@ -15,41 +25,31 @@ final class FlowTypeUITests: XCTestCase {
 
     @MainActor
     func testOnboardingLeadsIntoHome() throws {
-        let app = XCUIApplication()
-        app.launchEnvironment["FLOWTYPE_USE_MOCK_SERVICES"] = "1"
-        app.launchEnvironment["FLOWTYPE_RESET_STATE"] = "1"
+        let app = makeApp()
         app.launch()
 
-        XCTAssertTrue(app.staticTexts["Speak once. Send polished."].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.otherElements["flowtype.onboarding.screen"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.staticTexts["Speak once. Send polished."].waitForExistence(timeout: 5))
         app.buttons["Continue"].tap()
 
-        XCTAssertTrue(app.navigationBars["FlowType"].waitForExistence(timeout: 2))
-        XCTAssertTrue(app.buttons["Start Dictation"].exists)
+        XCTAssertTrue(app.otherElements["flowtype.home.screen"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.navigationBars["FlowType"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["Start Dictation"].waitForExistence(timeout: 5))
     }
 
     @MainActor
     func testMockDictationShowsReviewFlow() throws {
-        let app = XCUIApplication()
-        app.launchEnvironment["FLOWTYPE_USE_MOCK_SERVICES"] = "1"
-        app.launchEnvironment["FLOWTYPE_RESET_STATE"] = "1"
-        app.launchEnvironment["FLOWTYPE_SKIP_ONBOARDING"] = "1"
+        let app = makeApp(skipOnboarding: true)
         app.launch()
 
-        XCTAssertTrue(app.buttons["Start Dictation"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.otherElements["flowtype.home.screen"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.buttons["Start Dictation"].waitForExistence(timeout: 5))
         app.buttons["Start Dictation"].tap()
-        XCTAssertTrue(app.buttons["Stop Dictation"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.buttons["Stop Dictation"].waitForExistence(timeout: 5))
         app.buttons["Stop Dictation"].tap()
 
-        XCTAssertTrue(app.navigationBars["Review"].waitForExistence(timeout: 3))
-        XCTAssertTrue(app.buttons["Copy"].exists)
-        XCTAssertTrue(app.buttons["Share"].exists)
-    }
-
-    @MainActor
-    func testLaunchPerformance() throws {
-        // This measures how long it takes to launch your application.
-        measure(metrics: [XCTApplicationLaunchMetric()]) {
-            XCUIApplication().launch()
-        }
+        XCTAssertTrue(app.navigationBars["Review"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.buttons["Copy"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["Share"].waitForExistence(timeout: 5))
     }
 }

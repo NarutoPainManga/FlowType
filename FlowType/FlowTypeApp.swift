@@ -7,6 +7,7 @@ struct FlowTypeApp: App {
 
     init() {
         let environment = ProcessInfo.processInfo.environment
+        let isUITestMode = environment["FLOWTYPE_UI_TEST_MODE"] == "1"
 
         if environment["FLOWTYPE_RESET_STATE"] == "1" {
             AppModel.resetLocalState()
@@ -16,7 +17,7 @@ struct FlowTypeApp: App {
             AppModel.seedForTesting(hasCompletedOnboarding: true)
         }
 
-        let services = environment["FLOWTYPE_USE_MOCK_SERVICES"] == "1"
+        let services = isUITestMode || environment["FLOWTYPE_USE_MOCK_SERVICES"] == "1"
             ? FlowTypeServices.mock()
             : FlowTypeServiceFactory.makeServices()
 

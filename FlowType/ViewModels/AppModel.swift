@@ -258,6 +258,11 @@ final class AppModel: ObservableObject {
         UserDefaults.standard.set(true, forKey: StorageKeys.hasCompletedOnboarding)
     }
 
+    func clearLocalHistory() {
+        sessions = []
+        persistSessions()
+    }
+
     static func resetLocalState() {
         UserDefaults.standard.removeObject(forKey: StorageKeys.hasCompletedOnboarding)
         UserDefaults.standard.removeObject(forKey: StorageKeys.localSessions)

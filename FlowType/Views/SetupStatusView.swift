@@ -22,6 +22,12 @@ struct SetupStatusView: View {
                     .foregroundStyle(.secondary)
             }
 
+            Section("Data And Storage") {
+                Text("Completed drafts are stored on this iPhone so you can reopen recent work. FlowType also creates an anonymous session to check usage and reach its cloud processing services.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+
             Section("Usage") {
                 Text("FlowType currently includes a weekly dictation limit while the product is in early release. Your remaining usage updates inside the app.")
                     .font(.subheadline)
@@ -31,6 +37,31 @@ struct SetupStatusView: View {
             Section("Support") {
                 Text("If FlowType stops working, refresh the checks below, then relaunch the app after reconnecting to the internet or granting microphone access.")
                     .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section("Policies And Help") {
+                NavigationLink("Privacy Policy") {
+                    LegalDocumentView(document: .privacy)
+                }
+
+                NavigationLink("Terms of Service") {
+                    LegalDocumentView(document: .terms)
+                }
+
+                NavigationLink("Support Guide") {
+                    LegalDocumentView(document: .support)
+                }
+            }
+
+            Section("Manage Local Data") {
+                Button("Clear Recent Drafts") {
+                    appModel.clearLocalHistory()
+                }
+                .foregroundStyle(.red)
+
+                Text("This removes recent polished drafts saved on this iPhone. It does not change your weekly usage count.")
+                    .font(.footnote)
                     .foregroundStyle(.secondary)
             }
 
