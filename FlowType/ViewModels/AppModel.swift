@@ -343,6 +343,17 @@ final class AppModel: ObservableObject {
             selectedMode = .email
             currentTranscript = "client wants a friday homepage refresh and simpler pricing"
             currentPolishedText = "Client update: refresh the homepage by Friday and simplify pricing."
+        case "usage":
+            selectedMode = .email
+            usageSnapshot = UsageSnapshot(
+                weeklyDictationLimit: 30,
+                usedDictations: 30,
+                resetsAt: Calendar.current.date(byAdding: .day, value: 2, to: .now) ?? .now
+            )
+            isShowingPaywall = true
+        case "history":
+            selectedMode = .meetingNotes
+            favoriteModes = [.meetingNotes, .taskList, .slack]
         case "help":
             selectedMode = .meetingNotes
         case "onboarding":
@@ -391,6 +402,20 @@ final class AppModel: ObservableObject {
                 rawTranscript: "follow up with design update pricing section and send recap",
                 polishedText: "Tasks: follow up with design, update the pricing section, and send the recap.",
                 createdAt: .now.addingTimeInterval(-7200)
+            ),
+            DictationSession(
+                id: UUID(uuidString: "44444444-4444-4444-4444-444444444444") ?? UUID(),
+                mode: .email,
+                rawTranscript: "send launch draft to client and ask for final signoff",
+                polishedText: "Please review the latest launch draft and let me know if we have final signoff.",
+                createdAt: .now.addingTimeInterval(-10800)
+            ),
+            DictationSession(
+                id: UUID(uuidString: "55555555-5555-5555-5555-555555555555") ?? UUID(),
+                mode: .brainDump,
+                rawTranscript: "thinking through pricing message onboarding friction and demo timing",
+                polishedText: "Thinking through pricing messaging, onboarding friction, and demo timing before the launch push.",
+                createdAt: .now.addingTimeInterval(-14400)
             )
         ]
     }

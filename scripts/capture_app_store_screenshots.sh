@@ -59,5 +59,7 @@ launch_and_capture onboarding onboarding.png
 launch_and_capture home home.png
 launch_and_capture review review.png
 launch_and_capture help help.png
+launch_and_capture usage usage.png
+launch_and_capture history history.png
 
 echo "Saved screenshots to $OUTPUT_DIR"

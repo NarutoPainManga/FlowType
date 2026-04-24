@@ -8,6 +8,8 @@ FlowType now supports seeded screenshot scenes so App Store screenshots can be g
 - `home`
 - `review`
 - `help`
+- `usage`
+- `history`
 
 ## One-command capture
 
