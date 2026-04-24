@@ -4,10 +4,15 @@ import Combine
 
 @MainActor
 final class AppModel: ObservableObject {
+    enum StorageKeys {
+        static let hasCompletedOnboarding = "flowtype.hasCompletedOnboarding"
+        static let localSessions = "flowtype.localSessions"
+    }
+
     @Published var hasCompletedOnboarding = false
     @Published var selectedMode: FlowMode = .email
     @Published var favoriteModes: [FlowMode] = [.email, .slack, .taskList]
-    @Published var sessions: [DictationSession] = SampleData.sessions
+    @Published var sessions: [DictationSession] = []
     @Published var currentTranscript = ""
     @Published var currentPolishedText = ""
     @Published var isListening = false
@@ -26,8 +31,10 @@ final class AppModel: ObservableObject {
 
     private let services: FlowTypeServices
 
-    init(services: FlowTypeServices = .mock) {
+    init(services: FlowTypeServices) {
         self.services = services
+        self.hasCompletedOnboarding = UserDefaults.standard.bool(forKey: StorageKeys.hasCompletedOnboarding)
+        self.sessions = Self.loadStoredSessions()
         Task {
             await bootstrap()
         }
@@ -41,7 +48,7 @@ final class AppModel: ObservableObject {
             guard let session else {
                 await MainActor.run {
                     self.isListening = false
-                    self.errorMessage = "We couldn't create a session."
+                    self.errorMessage = "FlowType couldn't start right now. Please try again in a moment."
                 }
                 return
             }
@@ -137,6 +144,7 @@ final class AppModel: ObservableObject {
             createdAt: .now
         )
         sessions.insert(session, at: 0)
+        persistSessions()
         Task {
             guard let authSession = await ensureSession() else { return }
             try? await services.history.save(HistoryItem(session: session), for: authSession)
@@ -159,6 +167,7 @@ final class AppModel: ObservableObject {
             } catch {
                 await MainActor.run {
                     self.isProcessing = false
+                    self.errorMessage = error.localizedDescription
                 }
             }
         }
@@ -227,17 +236,48 @@ final class AppModel: ObservableObject {
             let history = try await services.history.fetchHistory(for: session)
             let mapped = history.map {
                 DictationSession(
+                    id: $0.id,
                     mode: $0.mode,
                     rawTranscript: $0.rawTranscript,
                     polishedText: $0.polishedText,
                     createdAt: $0.createdAt
                 )
             }
+            guard !mapped.isEmpty else { return }
             await MainActor.run {
                 self.sessions = mapped
+                self.persistSessions()
             }
         } catch {
             return
         }
+    }
+
+    func completeOnboarding() {
+        hasCompletedOnboarding = true
+        UserDefaults.standard.set(true, forKey: StorageKeys.hasCompletedOnboarding)
+    }
+
+    static func resetLocalState() {
+        UserDefaults.standard.removeObject(forKey: StorageKeys.hasCompletedOnboarding)
+        UserDefaults.standard.removeObject(forKey: StorageKeys.localSessions)
+    }
+
+    static func seedForTesting(hasCompletedOnboarding: Bool) {
+        UserDefaults.standard.set(hasCompletedOnboarding, forKey: StorageKeys.hasCompletedOnboarding)
+    }
+
+    private func persistSessions() {
+        guard let data = try? JSONEncoder().encode(sessions) else { return }
+        UserDefaults.standard.set(data, forKey: StorageKeys.localSessions)
+    }
+
+    private static func loadStoredSessions() -> [DictationSession] {
+        guard let data = UserDefaults.standard.data(forKey: StorageKeys.localSessions),
+              let sessions = try? JSONDecoder().decode([DictationSession].self, from: data) else {
+            return []
+        }
+
+        return sessions.sorted { $0.createdAt > $1.createdAt }
     }
 }

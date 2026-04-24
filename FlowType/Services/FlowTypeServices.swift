@@ -48,7 +48,7 @@ struct FlowTypeServices: Sendable {
 }
 
 extension FlowTypeServices {
-    static let mock: FlowTypeServices = {
+    static func mock() -> FlowTypeServices {
         let state = MockServiceState()
         return FlowTypeServices(
             auth: MockAuthService(state: state),
@@ -60,7 +60,7 @@ extension FlowTypeServices {
             history: MockHistoryService(state: state),
             diagnostics: MockSetupDiagnosticsService(state: state)
         )
-    }()
+    }
 }
 
 actor MockServiceState {
@@ -74,7 +74,7 @@ actor MockServiceState {
             usedDictations: 2,
             resetsAt: Calendar.current.date(byAdding: .day, value: 7, to: .now) ?? .now
         ),
-        history: [HistoryItem] = SampleData.sessions.map(HistoryItem.init(session:))
+        history: [HistoryItem] = []
     ) {
         self.usage = usage
         self.history = history
@@ -287,5 +287,92 @@ struct MockSetupDiagnosticsService: SetupDiagnosticsServicing {
                 detail: "Mock backend services are responding."
             )
         )
+    }
+}
+
+struct UnavailableAuthService: AuthServicing {
+    let reason: String
+
+    func currentSession() async throws -> AuthSession? {
+        throw ServiceUnavailableError(reason: reason)
+    }
+
+    func signInAnonymously() async throws -> AuthSession {
+        throw ServiceUnavailableError(reason: reason)
+    }
+}
+
+struct UnavailableAudioCaptureService: AudioCaptureServicing, AudioPermissionStatusProviding {
+    let reason: String
+
+    func startCapture() async throws {
+        throw ServiceUnavailableError(reason: reason)
+    }
+
+    func stopCapture() async throws -> AudioCaptureResult {
+        throw ServiceUnavailableError(reason: reason)
+    }
+
+    func currentPermissionStatus() async -> SetupStatusItem {
+        SetupStatusItem(
+            state: .failed(message: "FlowType unavailable."),
+            detail: reason
+        )
+    }
+}
+
+struct UnavailableTranscriptionService: TranscriptionServicing {
+    let reason: String
+
+    func transcribe(_ request: TranscriptionRequest) async throws -> TranscriptionResult {
+        _ = request
+        throw ServiceUnavailableError(reason: reason)
+    }
+}
+
+struct UnavailablePolishService: PolishServicing {
+    let reason: String
+
+    func polish(_ request: PolishRequest) async throws -> PolishResult {
+        _ = request
+        throw ServiceUnavailableError(reason: reason)
+    }
+}
+
+struct UnavailableTransformService: TransformServicing {
+    let reason: String
+
+    func transform(_ request: TransformRequest) async throws -> TransformResult {
+        _ = request
+        throw ServiceUnavailableError(reason: reason)
+    }
+}
+
+struct UnavailableUsageService: UsageServicing {
+    let reason: String
+
+    func fetchUsage(for session: AuthSession) async throws -> UsageSnapshot {
+        _ = session
+        throw ServiceUnavailableError(reason: reason)
+    }
+
+    func recordDictation(for session: AuthSession) async throws -> UsageSnapshot {
+        _ = session
+        throw ServiceUnavailableError(reason: reason)
+    }
+}
+
+struct UnavailableHistoryService: HistoryServicing {
+    let reason: String
+
+    func fetchHistory(for session: AuthSession) async throws -> [HistoryItem] {
+        _ = session
+        throw ServiceUnavailableError(reason: reason)
+    }
+
+    func save(_ item: HistoryItem, for session: AuthSession) async throws {
+        _ = item
+        _ = session
+        throw ServiceUnavailableError(reason: reason)
     }
 }

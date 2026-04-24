@@ -5,23 +5,40 @@ struct SetupStatusView: View {
 
     var body: some View {
         List {
-            Section("Setup Overview") {
+            Section("What FlowType Does") {
                 Text(summaryText)
                     .foregroundStyle(.secondary)
             }
 
-            Section("Checks") {
-                statusRow(title: "Supabase Config", item: appModel.setupStatus.configuration)
-                statusRow(title: "Microphone Permission", item: appModel.setupStatus.microphone)
-                statusRow(title: "Auth Session", item: appModel.setupStatus.auth)
-                statusRow(title: "Backend Connectivity", item: appModel.setupStatus.backend)
+            Section("How It Works") {
+                instructionRow("1", "Choose the mode that matches what you need to write.")
+                instructionRow("2", "Record one short voice note in your own words.")
+                instructionRow("3", "Review the polished result, then copy or share it anywhere you need.")
             }
 
-            Section("What To Finish In Xcode") {
-                instructionRow("1", "Add `NSMicrophoneUsageDescription` to the app target `Info.plist`.")
-                instructionRow("2", "Add the `Supabase` Swift package dependency.")
-                instructionRow("3", "Add `FlowTypeConfig.plist` using the example file in this repo.")
-                instructionRow("4", "Run the app and refresh this screen to confirm the live path.")
+            Section("Privacy And Processing") {
+                Text("FlowType uses microphone access to capture your recording and cloud processing to turn it into polished writing. Recording only starts after you tap the button, and you always review the result before you use it.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section("Usage") {
+                Text("FlowType currently includes a weekly dictation limit while the product is in early release. Your remaining usage updates inside the app.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section("Support") {
+                Text("If FlowType stops working, refresh the checks below, then relaunch the app after reconnecting to the internet or granting microphone access.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section("Status Checks") {
+                statusRow(title: "App Configuration", item: appModel.setupStatus.configuration)
+                statusRow(title: "Microphone Access", item: appModel.setupStatus.microphone)
+                statusRow(title: "Session", item: appModel.setupStatus.auth)
+                statusRow(title: "Cloud Processing", item: appModel.setupStatus.backend)
             }
 
             Section {
@@ -31,7 +48,7 @@ struct SetupStatusView: View {
                 .disabled(appModel.isRefreshingSetupStatus)
             }
         }
-        .navigationTitle("Setup Status")
+        .navigationTitle("Help & Status")
         .task {
             appModel.refreshSetupStatus()
         }
@@ -46,14 +63,14 @@ struct SetupStatusView: View {
         ]
 
         if items.allSatisfy(\.isReady) {
-            return "Everything needed for the live dictation flow looks ready."
+            return "FlowType is ready to capture speech, polish it, and help you send cleaner writing faster."
         }
 
         if items.contains(where: \.isFailed) {
-            return "At least one setup step is still blocking the live path. The details below show exactly what needs attention."
+            return "Something is blocking FlowType right now. The checks below show what needs attention before voice processing can work."
         }
 
-        return "The app is partially configured. Finish the remaining Xcode steps and refresh this screen."
+        return "FlowType is still getting ready. Refresh the checks after granting permissions or reconnecting."
     }
 
     private func statusRow(title: String, item: SetupStatusItem) -> some View {
@@ -85,7 +102,7 @@ struct SetupStatusView: View {
             Text(step)
                 .font(.caption.weight(.bold))
                 .frame(width: 20, height: 20)
-                .background(Color.blue.opacity(0.12))
+                .background(Color("BrandTeal").opacity(0.18))
                 .clipShape(Circle())
 
             Text(text)

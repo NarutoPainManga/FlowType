@@ -87,3 +87,12 @@ struct MockFlowTypeAPIClient: FlowTypeAPIClientProtocol {
         try await handler(request)
     }
 }
+
+struct UnavailableFlowTypeAPIClient: FlowTypeAPIClientProtocol {
+    let reason: String
+
+    func send(_ request: FlowTypeAPIRequest) async throws -> FlowTypeAPIResponse {
+        _ = request
+        throw ServiceUnavailableError(reason: reason)
+    }
+}

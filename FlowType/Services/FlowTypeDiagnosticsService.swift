@@ -34,7 +34,7 @@ struct FlowTypeDiagnosticsService: SetupDiagnosticsServicing {
 
 extension FlowTypeDiagnosticsService {
     static func live(
-        configurationStatusProvider: @escaping @Sendable () -> SetupStatusItem = { FlowTypeConfiguration.diagnosticStatus() },
+        configurationStatusProvider: @escaping @Sendable () -> SetupStatusItem,
         audioCapture: (any AudioPermissionStatusProviding)?,
         authService: any AuthServicing,
         apiClient: FlowTypeAPIClientProtocol,

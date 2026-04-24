@@ -10,27 +10,39 @@ import XCTest
 final class FlowTypeUITests: XCTestCase {
 
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-
-        // In UI tests it is usually best to stop immediately when a failure occurs.
         continueAfterFailure = false
-
-        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
-    }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
     @MainActor
-    func testExample() throws {
-        // UI tests must launch the application that they test.
+    func testOnboardingLeadsIntoHome() throws {
         let app = XCUIApplication()
+        app.launchEnvironment["FLOWTYPE_USE_MOCK_SERVICES"] = "1"
+        app.launchEnvironment["FLOWTYPE_RESET_STATE"] = "1"
         app.launch()
 
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // XCUIAutomation Documentation
-        // https://developer.apple.com/documentation/xcuiautomation
+        XCTAssertTrue(app.staticTexts["Speak once. Send polished."].waitForExistence(timeout: 2))
+        app.buttons["Continue"].tap()
+
+        XCTAssertTrue(app.navigationBars["FlowType"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.buttons["Start Dictation"].exists)
+    }
+
+    @MainActor
+    func testMockDictationShowsReviewFlow() throws {
+        let app = XCUIApplication()
+        app.launchEnvironment["FLOWTYPE_USE_MOCK_SERVICES"] = "1"
+        app.launchEnvironment["FLOWTYPE_RESET_STATE"] = "1"
+        app.launchEnvironment["FLOWTYPE_SKIP_ONBOARDING"] = "1"
+        app.launch()
+
+        XCTAssertTrue(app.buttons["Start Dictation"].waitForExistence(timeout: 2))
+        app.buttons["Start Dictation"].tap()
+        XCTAssertTrue(app.buttons["Stop Dictation"].waitForExistence(timeout: 2))
+        app.buttons["Stop Dictation"].tap()
+
+        XCTAssertTrue(app.navigationBars["Review"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["Copy"].exists)
+        XCTAssertTrue(app.buttons["Share"].exists)
     }
 
     @MainActor

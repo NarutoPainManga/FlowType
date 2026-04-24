@@ -29,13 +29,22 @@ struct ResultView: View {
                     }
                 }
 
-                Button(didCopy ? "Copied" : "Copy Result") {
-                    copyResult()
-                }
-                .buttonStyle(.borderedProminent)
-                .disabled(appModel.currentPolishedText.isEmpty)
+                HStack(spacing: 12) {
+                    Button(didCopy ? "Copied" : "Copy") {
+                        copyResult()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(Color("BrandTeal"))
+                    .disabled(appModel.currentPolishedText.isEmpty)
 
-                Text("Paste it into Messages, Mail, Slack, or anywhere else on your iPhone.")
+                    ShareLink(item: appModel.currentPolishedText) {
+                        Label("Share", systemImage: "square.and.arrow.up")
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(appModel.currentPolishedText.isEmpty)
+                }
+
+                Text("Copy or share your polished draft into Mail, Messages, Slack, Notes, and more.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
 

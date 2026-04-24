@@ -9,11 +9,34 @@ import Testing
 @testable import FlowType
 
 struct FlowTypeTests {
+    @Test
+    @MainActor
+    func onboardingStatePersistsAfterCompletion() async throws {
+        AppModel.resetLocalState()
+        let firstLaunch = AppModel(services: .mock())
 
-    @Test func example() async throws {
-        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
-        // Swift Testing Documentation
-        // https://developer.apple.com/documentation/testing
+        #expect(firstLaunch.hasCompletedOnboarding == false)
+
+        firstLaunch.completeOnboarding()
+
+        let secondLaunch = AppModel(services: .mock())
+        #expect(secondLaunch.hasCompletedOnboarding == true)
     }
 
+    @Test
+    @MainActor
+    func savedSessionsPersistAcrossRelaunch() async throws {
+        AppModel.resetLocalState()
+
+        let firstLaunch = AppModel(services: .mock())
+        firstLaunch.selectedMode = .slack
+        firstLaunch.currentTranscript = "quick update we can ship on friday"
+        firstLaunch.currentPolishedText = "Quick update: we can ship on Friday."
+        firstLaunch.saveCurrentSession()
+
+        let secondLaunch = AppModel(services: .mock())
+        #expect(secondLaunch.sessions.count == 1)
+        #expect(secondLaunch.sessions.first?.mode == .slack)
+        #expect(secondLaunch.sessions.first?.polishedText == "Quick update: we can ship on Friday.")
+    }
 }

@@ -3,7 +3,9 @@ import Foundation
 enum FlowTypeServiceFactory {
     static func makeServices() -> FlowTypeServices {
         guard let configuration = FlowTypeConfiguration.load() else {
-            return .mock
+            return unavailableServices(
+                reason: "FlowType is not configured correctly yet. Please reinstall or contact support."
+            )
         }
 
         #if canImport(Supabase)
@@ -17,6 +19,7 @@ enum FlowTypeServiceFactory {
             ]
         )
         let diagnostics = FlowTypeDiagnosticsService.live(
+            configurationStatusProvider: { FlowTypeConfiguration.diagnosticStatus() },
             audioCapture: audioCapture,
             authService: authService,
             apiClient: apiClient,
@@ -46,24 +49,32 @@ enum FlowTypeServiceFactory {
             diagnostics: diagnostics
         )
         #else
-        let state = MockServiceState()
-        let authService = MockAuthService(state: state)
-        let audioCapture = SystemAudioCaptureService()
+        return unavailableServices(
+            reason: "FlowType needs the full app build to connect to voice and cloud services."
+        )
+        #endif
+    }
+
+    private static func unavailableServices(reason: String) -> FlowTypeServices {
+        let authService = UnavailableAuthService(reason: reason)
+        let audioCapture = UnavailableAudioCaptureService(reason: reason)
+        let apiClient = UnavailableFlowTypeAPIClient(reason: reason)
+
         return FlowTypeServices(
             auth: authService,
             audioCapture: audioCapture,
-            transcription: MockTranscriptionService(),
-            polish: MockPolishService(),
-            transform: MockTransformService(),
-            usage: MockUsageService(state: state),
-            history: MockHistoryService(state: state),
+            transcription: UnavailableTranscriptionService(reason: reason),
+            polish: UnavailablePolishService(reason: reason),
+            transform: UnavailableTransformService(reason: reason),
+            usage: UnavailableUsageService(reason: reason),
+            history: UnavailableHistoryService(reason: reason),
             diagnostics: FlowTypeDiagnosticsService.live(
+                configurationStatusProvider: { FlowTypeConfiguration.diagnosticStatus() },
                 audioCapture: audioCapture,
                 authService: authService,
-                apiClient: MockFlowTypeAPIClient(),
+                apiClient: apiClient,
                 authTokenProvider: { nil }
             )
         )
-        #endif
     }
 }

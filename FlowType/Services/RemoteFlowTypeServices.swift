@@ -40,6 +40,7 @@ extension FlowTypeServices {
             usage: RemoteUsageService(apiClient: apiClient, authTokenProvider: tokenProvider),
             history: RemoteHistoryService(),
             diagnostics: FlowTypeDiagnosticsService.live(
+                configurationStatusProvider: { FlowTypeConfiguration.diagnosticStatus() },
                 audioCapture: audioCapture,
                 authService: authService,
                 apiClient: apiClient,
@@ -254,11 +255,12 @@ private struct TranscriptionResultDTO: Codable, Sendable {
 private struct PolishRequestDTO: Codable, Sendable {
     let transcript: String
     let mode: FlowMode
-    let source = "home"
+    let source: String
 
     init(request: PolishRequest) {
         self.transcript = request.transcript
         self.mode = request.mode
+        self.source = "home"
     }
 }
 

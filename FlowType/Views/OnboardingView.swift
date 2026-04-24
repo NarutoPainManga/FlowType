@@ -5,43 +5,78 @@ struct OnboardingView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: 24) {
-                Spacer()
+            ZStack {
+                LinearGradient(
+                    colors: [Color("BrandNavy"), Color("BrandInk"), Color.black],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
 
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("FlowType")
-                        .font(.largeTitle.bold())
+                VStack(alignment: .leading, spacing: 24) {
+                    Spacer()
 
-                    Text("Write work messages with your voice.")
-                        .font(.title2.weight(.semibold))
+                    VStack(alignment: .leading, spacing: 18) {
+                        Text("FlowType")
+                            .font(.largeTitle.bold())
+                            .foregroundStyle(.white)
 
-                    Text("Speak once. Get polished text for email, Slack, notes, and more.")
-                        .foregroundStyle(.secondary)
-                }
+                        Text("Speak once. Send polished.")
+                            .font(.title2.weight(.semibold))
+                            .foregroundStyle(.white)
 
-                VStack(alignment: .leading, spacing: 12) {
-                    FeatureRow(title: "Intent Modes", subtitle: "Format speech for the job you are doing.")
-                    FeatureRow(title: "Anywhere on iPhone", subtitle: "Use the keyboard inside your favorite apps.")
-                    FeatureRow(title: "Fast Cleanup", subtitle: "Fix punctuation, grammar, and structure in one tap.")
-                }
+                        Text("Turn rough voice notes into clean writing for email, Slack, notes, and task lists.")
+                            .foregroundStyle(.white.opacity(0.78))
 
-                Spacer()
-
-                VStack(spacing: 12) {
-                    NavigationLink("Review Setup Checklist") {
-                        SetupStatusView()
+                        HStack(spacing: 10) {
+                            Label("Built for busy workdays", systemImage: "sparkles")
+                            Label("Review before sending", systemImage: "checkmark.shield")
+                        }
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.white.opacity(0.88))
                     }
-                    .buttonStyle(.bordered)
-                    .frame(maxWidth: .infinity, alignment: .center)
 
-                    Button("Set Up FlowType") {
-                        appModel.hasCompletedOnboarding = true
+                    VStack(alignment: .leading, spacing: 12) {
+                        FeatureRow(
+                            title: "Speak Naturally",
+                            subtitle: "Capture the thought first. Clean it up after."
+                        )
+                        FeatureRow(
+                            title: "Choose The Right Mode",
+                            subtitle: "Format speech for email, Slack, notes, tasks, and more."
+                        )
+                        FeatureRow(
+                            title: "Copy Or Share Fast",
+                            subtitle: "Send polished writing anywhere on your iPhone."
+                        )
                     }
-                    .buttonStyle(.borderedProminent)
-                    .frame(maxWidth: .infinity, alignment: .center)
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Your voice is processed securely in the cloud to create polished text. You'll always review the result before you use it.")
+                            .font(.footnote)
+                            .foregroundStyle(.white.opacity(0.7))
+                    }
+
+                    Spacer()
+
+                    VStack(spacing: 12) {
+                        NavigationLink("How FlowType Works") {
+                            SetupStatusView()
+                        }
+                        .buttonStyle(.bordered)
+                        .tint(.white.opacity(0.28))
+                        .frame(maxWidth: .infinity, alignment: .center)
+
+                        Button("Continue") {
+                            appModel.completeOnboarding()
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(Color("BrandTeal"))
+                        .frame(maxWidth: .infinity, alignment: .center)
+                    }
                 }
+                .padding(24)
             }
-            .padding(24)
         }
     }
 }
@@ -54,12 +89,13 @@ private struct FeatureRow: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
                 .font(.headline)
+                .foregroundStyle(.white)
             Text(subtitle)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.white.opacity(0.72))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
-        .background(Color(.secondarySystemBackground))
+        .background(.white.opacity(0.08))
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 }

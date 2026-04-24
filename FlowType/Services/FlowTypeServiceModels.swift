@@ -1,5 +1,13 @@
 import Foundation
 
+struct ServiceUnavailableError: LocalizedError, Sendable {
+    let reason: String
+
+    var errorDescription: String? {
+        reason
+    }
+}
+
 struct AuthSession: Equatable, Sendable {
     let userID: UUID
     let isAnonymous: Bool
