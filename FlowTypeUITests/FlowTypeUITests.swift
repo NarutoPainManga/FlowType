@@ -52,4 +52,36 @@ final class FlowTypeUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Copy"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["Share"].waitForExistence(timeout: 5))
     }
+
+    @MainActor
+    func testDeleteAnonymousAccountClearsRecentDrafts() throws {
+        let app = makeApp(skipOnboarding: true)
+        app.launch()
+
+        XCTAssertTrue(app.otherElements["flowtype.home.screen"].waitForExistence(timeout: 8))
+
+        app.buttons["Start Dictation"].tap()
+        XCTAssertTrue(app.buttons["Stop Dictation"].waitForExistence(timeout: 5))
+        app.buttons["Stop Dictation"].tap()
+
+        XCTAssertTrue(app.navigationBars["Review"].waitForExistence(timeout: 8))
+        app.navigationBars["Review"].buttons.element(boundBy: 0).tap()
+
+        XCTAssertTrue(app.staticTexts["Recent On This iPhone"].waitForExistence(timeout: 5))
+
+        app.buttons["Help and Status"].tap()
+        XCTAssertTrue(app.navigationBars["Help & Status"].waitForExistence(timeout: 5))
+
+        let deleteButton = app.buttons["flowtype.deleteAccount"]
+        XCTAssertTrue(deleteButton.waitForExistence(timeout: 5))
+        deleteButton.tap()
+
+        let confirmButton = app.buttons["flowtype.confirmDeleteAccount"]
+        XCTAssertTrue(confirmButton.waitForExistence(timeout: 5))
+        confirmButton.tap()
+
+        XCTAssertTrue(app.navigationBars["FlowType"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.buttons["Start Dictation"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Your polished drafts will show up here after you finish a session."].waitForExistence(timeout: 5))
+    }
 }

@@ -60,6 +60,7 @@ struct SetupStatusView: View {
                     appModel.clearLocalHistory()
                 }
                 .foregroundStyle(.red)
+                .accessibilityIdentifier("flowtype.clearDrafts")
 
                 Text("This removes recent polished drafts saved on this iPhone. It does not change your weekly usage count.")
                     .font(.footnote)
@@ -72,6 +73,7 @@ struct SetupStatusView: View {
                 }
                 .foregroundStyle(.red)
                 .disabled(appModel.isDeletingAccount)
+                .accessibilityIdentifier("flowtype.deleteAccount")
 
                 Text("This deletes the current anonymous FlowType account, clears recent drafts on this iPhone, and signs this device out. The next time you use FlowType, a new anonymous account will be created.")
                     .font(.footnote)
@@ -97,6 +99,7 @@ struct SetupStatusView: View {
             Button("Delete Account", role: .destructive) {
                 appModel.deleteAnonymousAccount()
             }
+            .accessibilityIdentifier("flowtype.confirmDeleteAccount")
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("This will delete the current anonymous account and clear recent drafts saved on this iPhone.")
