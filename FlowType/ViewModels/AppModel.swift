@@ -305,6 +305,54 @@ final class AppModel: ObservableObject {
         UserDefaults.standard.set(hasCompletedOnboarding, forKey: StorageKeys.hasCompletedOnboarding)
     }
 
+    func applyScreenshotScenario(_ scenario: String) {
+        hasCompletedOnboarding = scenario != "onboarding"
+        if hasCompletedOnboarding {
+            UserDefaults.standard.set(true, forKey: StorageKeys.hasCompletedOnboarding)
+        } else {
+            UserDefaults.standard.removeObject(forKey: StorageKeys.hasCompletedOnboarding)
+        }
+
+        let sampleSessions = Self.screenshotSessions
+        sessions = scenario == "onboarding" ? [] : sampleSessions
+        currentTranscript = ""
+        currentPolishedText = ""
+        isListening = false
+        isProcessing = false
+        processingMessage = "Polishing..."
+        errorMessage = nil
+        isShowingPaywall = false
+        selectedMode = .slack
+        favoriteModes = [.slack, .email, .meetingNotes]
+        usageSnapshot = UsageSnapshot(
+            weeklyDictationLimit: 30,
+            usedDictations: 6,
+            resetsAt: Calendar.current.date(byAdding: .day, value: 5, to: .now) ?? .now
+        )
+        setupStatus = SetupStatusSnapshot(
+            configuration: SetupStatusItem(state: .ready, detail: "FlowType is connected and ready."),
+            microphone: SetupStatusItem(state: .ready, detail: "Microphone access has been granted."),
+            auth: SetupStatusItem(state: .ready, detail: "Anonymous session is available."),
+            backend: SetupStatusItem(state: .ready, detail: "Transcription and polishing services are responding.")
+        )
+
+        switch scenario {
+        case "review":
+            selectedMode = .email
+            currentTranscript = "hey just left the client call they want the homepage refreshed by friday and they want us to simplify pricing"
+            currentPolishedText = "Quick update from the client call: they would like the homepage refreshed by Friday and want the pricing section simplified. I will send a more detailed recap shortly."
+        case "help":
+            selectedMode = .meetingNotes
+        case "onboarding":
+            usageSnapshot = AppModel.defaultUsageSnapshot
+            setupStatus = SetupStatusSnapshot.placeholder
+        default:
+            break
+        }
+
+        persistSessions()
+    }
+
     private func persistSessions() {
         guard let data = try? JSONEncoder().encode(sessions) else { return }
         UserDefaults.standard.set(data, forKey: StorageKeys.localSessions)
@@ -317,5 +365,31 @@ final class AppModel: ObservableObject {
         }
 
         return sessions.sorted { $0.createdAt > $1.createdAt }
+    }
+
+    private static var screenshotSessions: [DictationSession] {
+        [
+            DictationSession(
+                id: UUID(uuidString: "11111111-1111-1111-1111-111111111111") ?? UUID(),
+                mode: .slack,
+                rawTranscript: "quick update for the team we shipped the signup fix and support volume is already down",
+                polishedText: "Quick team update: we shipped the signup fix, and support volume is already trending down.",
+                createdAt: .now.addingTimeInterval(-900)
+            ),
+            DictationSession(
+                id: UUID(uuidString: "22222222-2222-2222-2222-222222222222") ?? UUID(),
+                mode: .meetingNotes,
+                rawTranscript: "client wants mobile speed reviewed this week and homepage copy tightened before launch",
+                polishedText: "Client notes: review mobile performance this week and tighten homepage copy before launch.",
+                createdAt: .now.addingTimeInterval(-3600)
+            ),
+            DictationSession(
+                id: UUID(uuidString: "33333333-3333-3333-3333-333333333333") ?? UUID(),
+                mode: .taskList,
+                rawTranscript: "follow up with design update pricing section and send recap",
+                polishedText: "Tasks: follow up with design, update the pricing section, and send the recap.",
+                createdAt: .now.addingTimeInterval(-7200)
+            )
+        ]
     }
 }

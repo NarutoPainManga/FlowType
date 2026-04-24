@@ -8,6 +8,7 @@ struct FlowTypeApp: App {
     init() {
         let environment = ProcessInfo.processInfo.environment
         let isUITestMode = environment["FLOWTYPE_UI_TEST_MODE"] == "1"
+        let screenshotScenario = environment["FLOWTYPE_SCREENSHOT_SCENE"]
 
         if environment["FLOWTYPE_RESET_STATE"] == "1" {
             AppModel.resetLocalState()
@@ -21,7 +22,12 @@ struct FlowTypeApp: App {
             ? FlowTypeServices.mock()
             : FlowTypeServiceFactory.makeServices()
 
-        _appModel = StateObject(wrappedValue: AppModel(services: services))
+        let model = AppModel(services: services)
+        if let screenshotScenario, !screenshotScenario.isEmpty {
+            model.applyScreenshotScenario(screenshotScenario)
+        }
+
+        _appModel = StateObject(wrappedValue: model)
     }
 
     var body: some Scene {
