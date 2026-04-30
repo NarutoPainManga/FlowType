@@ -12,7 +12,7 @@
       <div class="eyebrow">Privacy Policy</div>
       <h1>FlowType Privacy Policy</h1>
       <p class="lede">FlowType helps you turn spoken thoughts into polished writing on iPhone.</p>
-      <p class="meta">Last updated: April 23, 2026</p>
+      <p class="meta">Last updated: April 30, 2026</p>
       <nav class="nav" aria-label="Secondary">
         <a href="./index.html">Home</a>
         <a href="./terms.html">Terms</a>
@@ -39,22 +39,26 @@
 
       <h2>Audio handling</h2>
       <p>FlowType only records when you tap the record button. It does not listen in the background.</p>
-      <p>Audio is temporarily captured on device for processing and then sent to FlowType cloud services to create your transcript and polished result.</p>
+      <p>Audio is temporarily captured on device for processing and then, if you allow it in the app, sent to FlowType's backend and AI service providers to create your transcript and polished result.</p>
 
       <h2>Local storage</h2>
       <p>FlowType stores recent polished drafts on your device so you can reopen them later. You can clear recent drafts from the app.</p>
 
-      <h2>Cloud services</h2>
-      <p>FlowType uses hosted backend services to authenticate anonymous sessions, process voice input, and return polished text. These services may process your requests on FlowType's behalf.</p>
+      <h2>Third-party services</h2>
+      <p>FlowType uses Supabase to host backend endpoints, create anonymous sessions, and support usage/account requests.</p>
+      <p>FlowType uses OpenAI to transcribe audio and generate polished or rewritten text from the content you submit.</p>
 
       <h2>Data sharing</h2>
       <p>FlowType does not sell your personal information.</p>
-      <p>FlowType may share data with service providers only as needed to operate transcription, rewriting, hosting, authentication, and usage tracking.</p>
+      <p>FlowType may share data with Supabase and OpenAI only as needed to operate transcription, rewriting, hosting, authentication, and usage tracking.</p>
+      <p>Before FlowType sends recordings, transcripts, polished text, or rewrite text for AI processing, the app asks for your permission inside the app.</p>
+      <p>FlowType only shares this data with service providers used to operate the app on FlowType's behalf and expects those providers to protect the data while processing it for the service.</p>
 
       <h2>Your choices</h2>
       <ul>
         <li>You can deny microphone access, although recording will not work without it.</li>
         <li>You can clear recent drafts saved on your device from inside the app.</li>
+        <li>You can decline or later withdraw permission for AI processing from inside the app. Without that permission, FlowType will not send recordings or text to Supabase and OpenAI for cloud processing.</li>
         <li>You can delete the current anonymous FlowType account from inside the app.</li>
         <li>You can stop using the service at any time.</li>
       </ul>

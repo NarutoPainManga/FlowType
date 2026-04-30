@@ -27,15 +27,32 @@ struct SetupStatusView: View {
             }
 
             Section("Privacy And Processing") {
-                Text("FlowType uses microphone access to capture your recording and cloud processing to turn it into polished writing. Recording only starts after you tap the button, and you always review the result before you use it.")
+                Text("FlowType uses microphone access to capture your recording and sends approved requests to Supabase and OpenAI to turn speech into polished writing. Recording only starts after you tap the button, and you always review the result before you use it.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
 
             Section("Data And Storage") {
-                Text("Completed drafts are stored on this iPhone so you can reopen recent work. FlowType also creates an anonymous session to check usage and reach its cloud processing services.")
+                Text("Completed drafts are stored on this iPhone so you can reopen recent work. FlowType also creates an anonymous session with Supabase to check usage and reach its backend services.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            }
+
+            Section("AI Processing Permission") {
+                Text("Before FlowType sends recordings, transcripts, or rewrite text to OpenAI and Supabase, it asks for your permission inside the app.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+
+                Text(appModel.hasAcceptedThirdPartyAIConsent ? "Current status: Allowed" : "Current status: Not allowed")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(appModel.hasAcceptedThirdPartyAIConsent ? .green : .secondary)
+
+                if appModel.hasAcceptedThirdPartyAIConsent {
+                    Button("Withdraw AI Processing Permission") {
+                        appModel.revokeThirdPartyAIConsent()
+                    }
+                    .foregroundStyle(.red)
+                }
             }
 
             Section("Usage") {

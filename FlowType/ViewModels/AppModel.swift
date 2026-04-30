@@ -7,6 +7,7 @@ final class AppModel: ObservableObject {
     enum StorageKeys {
         static let hasCompletedOnboarding = "flowtype.hasCompletedOnboarding"
         static let localSessions = "flowtype.localSessions"
+        static let hasAcceptedThirdPartyAIConsent = "flowtype.hasAcceptedThirdPartyAIConsent"
     }
 
     static let defaultUsageSnapshot = UsageSnapshot(
@@ -16,6 +17,7 @@ final class AppModel: ObservableObject {
     )
 
     @Published var hasCompletedOnboarding = false
+    @Published var hasAcceptedThirdPartyAIConsent = false
     @Published var selectedMode: FlowMode = .email
     @Published var favoriteModes: [FlowMode] = [.email, .slack, .taskList]
     @Published var sessions: [DictationSession] = []
@@ -31,12 +33,20 @@ final class AppModel: ObservableObject {
     @Published var setupStatus = SetupStatusSnapshot.placeholder
     @Published var isRefreshingSetupStatus = false
     @Published var isDeletingAccount = false
+    @Published var isShowingThirdPartyAIConsent = false
 
     private let services: FlowTypeServices
+    private var pendingCloudAction: PendingCloudAction?
+
+    private enum PendingCloudAction {
+        case startDictation
+        case transform(TransformIntent)
+    }
 
     init(services: FlowTypeServices, shouldBootstrap: Bool = true) {
         self.services = services
         self.hasCompletedOnboarding = UserDefaults.standard.bool(forKey: StorageKeys.hasCompletedOnboarding)
+        self.hasAcceptedThirdPartyAIConsent = UserDefaults.standard.bool(forKey: StorageKeys.hasAcceptedThirdPartyAIConsent)
         self.sessions = Self.loadStoredSessions()
         if shouldBootstrap {
             Task {
@@ -47,6 +57,16 @@ final class AppModel: ObservableObject {
 
     func startDictation() {
         guard !isProcessing else { return }
+        guard hasAcceptedThirdPartyAIConsent else {
+            pendingCloudAction = .startDictation
+            isShowingThirdPartyAIConsent = true
+            return
+        }
+
+        beginStartDictation()
+    }
+
+    private func beginStartDictation() {
         currentPolishedText = ""
         Task {
             let session = await ensureSession()
@@ -158,6 +178,16 @@ final class AppModel: ObservableObject {
 
     func transformCurrentText(using intent: TransformIntent) {
         guard !currentPolishedText.isEmpty, !isProcessing else { return }
+        guard hasAcceptedThirdPartyAIConsent else {
+            pendingCloudAction = .transform(intent)
+            isShowingThirdPartyAIConsent = true
+            return
+        }
+
+        beginTransformCurrentText(using: intent)
+    }
+
+    private func beginTransformCurrentText(using intent: TransformIntent) {
         isProcessing = true
 
         Task {
@@ -176,6 +206,35 @@ final class AppModel: ObservableObject {
                 }
             }
         }
+    }
+
+    func acceptThirdPartyAIConsent() {
+        hasAcceptedThirdPartyAIConsent = true
+        UserDefaults.standard.set(true, forKey: StorageKeys.hasAcceptedThirdPartyAIConsent)
+        isShowingThirdPartyAIConsent = false
+
+        let pendingAction = pendingCloudAction
+        pendingCloudAction = nil
+
+        switch pendingAction {
+        case .startDictation:
+            beginStartDictation()
+        case let .transform(intent):
+            beginTransformCurrentText(using: intent)
+        case nil:
+            break
+        }
+    }
+
+    func declineThirdPartyAIConsent() {
+        pendingCloudAction = nil
+        isShowingThirdPartyAIConsent = false
+        errorMessage = "FlowType needs your permission before sending recordings or text to OpenAI and Supabase for cloud processing."
+    }
+
+    func revokeThirdPartyAIConsent() {
+        hasAcceptedThirdPartyAIConsent = false
+        UserDefaults.standard.removeObject(forKey: StorageKeys.hasAcceptedThirdPartyAIConsent)
     }
 
     func refreshSetupStatus() {
@@ -301,19 +360,23 @@ final class AppModel: ObservableObject {
     static func resetLocalState() {
         UserDefaults.standard.removeObject(forKey: StorageKeys.hasCompletedOnboarding)
         UserDefaults.standard.removeObject(forKey: StorageKeys.localSessions)
+        UserDefaults.standard.removeObject(forKey: StorageKeys.hasAcceptedThirdPartyAIConsent)
     }
 
     static func seedForTesting(hasCompletedOnboarding: Bool) {
         UserDefaults.standard.set(hasCompletedOnboarding, forKey: StorageKeys.hasCompletedOnboarding)
+        UserDefaults.standard.set(true, forKey: StorageKeys.hasAcceptedThirdPartyAIConsent)
     }
 
     func applyScreenshotScenario(_ scenario: String) {
         hasCompletedOnboarding = scenario != "onboarding"
+        hasAcceptedThirdPartyAIConsent = true
         if hasCompletedOnboarding {
             UserDefaults.standard.set(true, forKey: StorageKeys.hasCompletedOnboarding)
         } else {
             UserDefaults.standard.removeObject(forKey: StorageKeys.hasCompletedOnboarding)
         }
+        UserDefaults.standard.set(true, forKey: StorageKeys.hasAcceptedThirdPartyAIConsent)
 
         let sampleSessions = Self.screenshotSessions
         sessions = scenario == "onboarding" ? [] : sampleSessions

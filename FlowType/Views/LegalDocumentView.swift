@@ -41,7 +41,7 @@ private extension LegalDocument {
             return [
                 LegalSection(
                     title: "What FlowType Processes",
-                    body: "FlowType processes the audio you record, the transcript created from that recording, the polished text returned to you, and basic anonymous session information needed to connect the app to its backend services."
+                    body: "FlowType processes the audio you record, the transcript created from that recording, the polished text returned to you, rewrite text you request, and basic anonymous session information needed to connect the app to its backend services."
                 ),
                 LegalSection(
                     title: "How FlowType Uses Data",
@@ -52,8 +52,12 @@ private extension LegalDocument {
                     body: "Recent polished drafts are stored on this iPhone so you can reopen them later. You can clear recent drafts from Help & Status."
                 ),
                 LegalSection(
-                    title: "Cloud Processing",
-                    body: "FlowType sends recordings and text securely to its cloud processing services to create transcripts and polished results. Review every result before sharing or sending it."
+                    title: "Third-Party Services",
+                    body: "FlowType sends approved requests to Supabase and OpenAI. Supabase hosts anonymous authentication and backend endpoints. OpenAI processes audio transcription and generates polished or rewritten text."
+                ),
+                LegalSection(
+                    title: "Permission",
+                    body: "Before FlowType sends recordings, transcripts, polished text, or rewrite text for AI processing, the app asks for your permission. You can withdraw that permission from Help & Status."
                 )
             ]
         case .terms:

@@ -41,6 +41,9 @@ struct HomeView: View {
             Text("No background listening. FlowType only records when you tap Start Dictation.")
                 .font(.caption)
                 .foregroundStyle(.white.opacity(0.72))
+            Text("FlowType asks your permission before sending recordings or text to OpenAI and Supabase for cloud processing.")
+                .font(.caption)
+                .foregroundStyle(.white.opacity(0.72))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(20)
@@ -129,6 +132,9 @@ struct HomeView: View {
                 .padding(20)
                 .navigationTitle("Usage Limit")
             }
+        }
+        .sheet(isPresented: $appModel.isShowingThirdPartyAIConsent) {
+            ThirdPartyAIConsentView()
         }
     }
 

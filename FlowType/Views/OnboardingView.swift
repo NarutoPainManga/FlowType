@@ -52,7 +52,7 @@ struct OnboardingView: View {
                     }
 
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Your voice is processed securely in the cloud to create polished text. You'll always review the result before you use it.")
+                        Text("FlowType asks your permission before it sends recordings or text to Supabase and OpenAI for cloud processing. You'll always review the result before you use it.")
                             .font(.footnote)
                             .foregroundStyle(.white.opacity(0.7))
                     }
