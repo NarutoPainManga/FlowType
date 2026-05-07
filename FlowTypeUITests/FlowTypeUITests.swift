@@ -84,4 +84,30 @@ final class FlowTypeUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Start Dictation"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["Your polished drafts will show up here after you finish a session."].waitForExistence(timeout: 5))
     }
+
+    @MainActor
+    func testFreeRewriteLimitBlocksSecondRewrite() throws {
+        let app = makeApp(skipOnboarding: true)
+        app.launch()
+
+        XCTAssertTrue(app.otherElements["flowtype.home.screen"].waitForExistence(timeout: 8))
+
+        app.buttons["Start Dictation"].tap()
+        XCTAssertTrue(app.buttons["Stop Dictation"].waitForExistence(timeout: 5))
+        app.buttons["Stop Dictation"].tap()
+
+        XCTAssertTrue(app.navigationBars["Review"].waitForExistence(timeout: 8))
+
+        let shorterButton = app.buttons["Shorter"]
+        XCTAssertTrue(shorterButton.waitForExistence(timeout: 5))
+        XCTAssertTrue(shorterButton.isEnabled)
+        shorterButton.tap()
+
+        XCTAssertTrue(app.staticTexts["Free accounts currently include one AI rewrite per draft."].waitForExistence(timeout: 5))
+        XCTAssertFalse(shorterButton.isEnabled)
+        XCTAssertFalse(app.buttons["Professional"].isEnabled)
+        XCTAssertFalse(app.buttons["Friendly"].isEnabled)
+        XCTAssertFalse(app.buttons["Bullet List"].isEnabled)
+        XCTAssertTrue(app.textViews.firstMatch.value as? String == "Quick follow-up: we can ship v1 by Friday if design signs off today.")
+    }
 }
