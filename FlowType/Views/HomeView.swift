@@ -120,7 +120,7 @@ struct HomeView: View {
                         .font(.title2.bold())
                     Text("You have used \(appModel.usageSnapshot.usedDictations) of \(appModel.usageSnapshot.weeklyDictationLimit) dictations for this week.")
                         .foregroundStyle(.secondary)
-                    Text("FlowType is still in early release. More usage options are coming, but for now your free limit resets automatically next week.")
+                    Text("Free accounts currently include up to \(appModel.usageSnapshot.weeklyDictationLimit) dictations each week and one AI rewrite per draft. Your free usage resets automatically next week.")
                         .foregroundStyle(.secondary)
                     Button("Close") {
                         appModel.isShowingPaywall = false

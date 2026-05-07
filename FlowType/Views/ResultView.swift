@@ -29,6 +29,10 @@ struct ResultView: View {
                     }
                 }
 
+                Text(transformHint)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
                 HStack(spacing: 12) {
                     Button(didCopy ? "Copied" : "Copy") {
                         copyResult()
@@ -65,6 +69,15 @@ struct ResultView: View {
             appModel.transformCurrentText(using: intent)
         }
         .buttonStyle(.bordered)
+        .disabled(appModel.currentPolishedText.isEmpty || appModel.isProcessing || appModel.remainingFreeTransformsForCurrentDraft == 0)
+    }
+
+    private var transformHint: String {
+        if appModel.remainingFreeTransformsForCurrentDraft > 0 {
+            return "\(appModel.remainingFreeTransformsForCurrentDraft) AI rewrite left for this draft."
+        }
+
+        return "Free accounts currently include one AI rewrite per draft."
     }
 
     private func copyResult() {

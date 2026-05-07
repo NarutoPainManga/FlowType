@@ -91,7 +91,7 @@ private struct ScreenshotUsageView: View {
                 Text("Usage Limit")
                     .font(.largeTitle.bold())
 
-                Text("FlowType is in early release, so your weekly dictation limit resets automatically.")
+                Text("FlowType keeps free usage intentionally small while the product is still early.")
                     .font(.title3)
                     .foregroundStyle(.secondary)
 
@@ -100,7 +100,7 @@ private struct ScreenshotUsageView: View {
                         .font(.title2.bold())
                     Text("You have used \(appModel.usageSnapshot.usedDictations) of \(appModel.usageSnapshot.weeklyDictationLimit) dictations for this week.")
                         .foregroundStyle(.secondary)
-                    Text("Your free usage resets soon, and more usage options are coming in a future update.")
+                    Text("Free accounts currently include one AI rewrite per draft, and your dictation limit resets soon.")
                         .foregroundStyle(.secondary)
 
                     HStack {

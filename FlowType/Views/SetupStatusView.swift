@@ -56,7 +56,7 @@ struct SetupStatusView: View {
             }
 
             Section("Usage") {
-                Text("FlowType currently includes a weekly dictation limit while the product is in early release. Your remaining usage updates inside the app.")
+                Text("FlowType currently includes a small free weekly dictation limit while the product is in early release. Free accounts also get one AI rewrite per polished draft so API costs stay predictable.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }

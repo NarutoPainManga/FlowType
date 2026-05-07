@@ -39,4 +39,25 @@ struct FlowTypeTests {
         #expect(secondLaunch.sessions.first?.mode == .slack)
         #expect(secondLaunch.sessions.first?.polishedText == "Quick update: we can ship on Friday.")
     }
+
+    @Test
+    @MainActor
+    func freeRewriteLimitStopsSecondTransform() async throws {
+        AppModel.resetLocalState()
+
+        let appModel = AppModel(services: .mock(), shouldBootstrap: false)
+        appModel.hasAcceptedThirdPartyAIConsent = true
+        appModel.currentPolishedText = "Quick update: we can ship on Friday."
+
+        appModel.transformCurrentText(using: .shorter)
+        try await Task.sleep(for: .milliseconds(100))
+
+        #expect(appModel.remainingFreeTransformsForCurrentDraft == 0)
+        #expect(appModel.currentPolishedText == "Quick follow-up: we can ship v1 by Friday if design signs off today.")
+
+        appModel.transformCurrentText(using: .professional)
+
+        #expect(appModel.errorMessage == "Free accounts currently include one AI rewrite per draft to keep usage sustainable.")
+        #expect(appModel.remainingFreeTransformsForCurrentDraft == 0)
+    }
 }

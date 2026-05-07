@@ -10,8 +10,13 @@ final class AppModel: ObservableObject {
         static let hasAcceptedThirdPartyAIConsent = "flowtype.hasAcceptedThirdPartyAIConsent"
     }
 
+    enum SpendPolicy {
+        static let freeWeeklyDictationLimit = 5
+        static let freeTransformsPerDraft = 1
+    }
+
     static let defaultUsageSnapshot = UsageSnapshot(
-        weeklyDictationLimit: 30,
+        weeklyDictationLimit: SpendPolicy.freeWeeklyDictationLimit,
         usedDictations: 0,
         resetsAt: Calendar.current.date(byAdding: .day, value: 7, to: .now) ?? .now
     )
@@ -34,6 +39,7 @@ final class AppModel: ObservableObject {
     @Published var isRefreshingSetupStatus = false
     @Published var isDeletingAccount = false
     @Published var isShowingThirdPartyAIConsent = false
+    @Published private(set) var remainingFreeTransformsForCurrentDraft = SpendPolicy.freeTransformsPerDraft
 
     private let services: FlowTypeServices
     private var pendingCloudAction: PendingCloudAction?
@@ -68,6 +74,7 @@ final class AppModel: ObservableObject {
 
     private func beginStartDictation() {
         currentPolishedText = ""
+        remainingFreeTransformsForCurrentDraft = Self.SpendPolicy.freeTransformsPerDraft
         Task {
             let session = await ensureSession()
             guard let session else {
@@ -178,6 +185,10 @@ final class AppModel: ObservableObject {
 
     func transformCurrentText(using intent: TransformIntent) {
         guard !currentPolishedText.isEmpty, !isProcessing else { return }
+        guard remainingFreeTransformsForCurrentDraft > 0 else {
+            errorMessage = "Free accounts currently include one AI rewrite per draft to keep usage sustainable."
+            return
+        }
         guard hasAcceptedThirdPartyAIConsent else {
             pendingCloudAction = .transform(intent)
             isShowingThirdPartyAIConsent = true
@@ -197,6 +208,7 @@ final class AppModel: ObservableObject {
                 )
                 await MainActor.run {
                     self.currentPolishedText = result.text
+                    self.remainingFreeTransformsForCurrentDraft = max(self.remainingFreeTransformsForCurrentDraft - 1, 0)
                     self.isProcessing = false
                 }
             } catch {
@@ -284,7 +296,7 @@ final class AppModel: ObservableObject {
 
     private func refreshUsage(for session: AuthSession) async -> UsageSnapshot {
         do {
-            let usage = try await services.usage.fetchUsage(for: session)
+            let usage = Self.normalizedUsage(try await services.usage.fetchUsage(for: session))
             await MainActor.run {
                 self.usageSnapshot = usage
                 self.isShowingPaywall = !usage.hasRemainingDictations
@@ -382,6 +394,7 @@ final class AppModel: ObservableObject {
         sessions = scenario == "onboarding" ? [] : sampleSessions
         currentTranscript = ""
         currentPolishedText = ""
+        remainingFreeTransformsForCurrentDraft = Self.SpendPolicy.freeTransformsPerDraft
         isListening = false
         isProcessing = false
         processingMessage = "Polishing..."
@@ -390,8 +403,8 @@ final class AppModel: ObservableObject {
         selectedMode = .slack
         favoriteModes = [.slack, .email, .meetingNotes]
         usageSnapshot = UsageSnapshot(
-            weeklyDictationLimit: 30,
-            usedDictations: 6,
+            weeklyDictationLimit: Self.SpendPolicy.freeWeeklyDictationLimit,
+            usedDictations: 3,
             resetsAt: Calendar.current.date(byAdding: .day, value: 5, to: .now) ?? .now
         )
         setupStatus = SetupStatusSnapshot(
@@ -406,11 +419,12 @@ final class AppModel: ObservableObject {
             selectedMode = .email
             currentTranscript = "client wants a friday homepage refresh and simpler pricing"
             currentPolishedText = "Client update: refresh the homepage by Friday and simplify pricing."
+            remainingFreeTransformsForCurrentDraft = 1
         case "usage":
             selectedMode = .email
             usageSnapshot = UsageSnapshot(
-                weeklyDictationLimit: 30,
-                usedDictations: 30,
+                weeklyDictationLimit: Self.SpendPolicy.freeWeeklyDictationLimit,
+                usedDictations: Self.SpendPolicy.freeWeeklyDictationLimit,
                 resetsAt: Calendar.current.date(byAdding: .day, value: 2, to: .now) ?? .now
             )
             isShowingPaywall = true
@@ -481,5 +495,16 @@ final class AppModel: ObservableObject {
                 createdAt: .now.addingTimeInterval(-14400)
             )
         ]
+    }
+
+    private static func normalizedUsage(_ usage: UsageSnapshot) -> UsageSnapshot {
+        let weeklyLimit = min(usage.weeklyDictationLimit, SpendPolicy.freeWeeklyDictationLimit)
+        let usedDictations = min(usage.usedDictations, weeklyLimit)
+
+        return UsageSnapshot(
+            weeklyDictationLimit: weeklyLimit,
+            usedDictations: usedDictations,
+            resetsAt: usage.resetsAt
+        )
     }
 }
