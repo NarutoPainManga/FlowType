@@ -1,5 +1,10 @@
 import Foundation
 
+enum FlowTypeSpendPolicy {
+    static let freeWeeklyDictationLimit = 5
+    static let freeTransformsPerDraft = 1
+}
+
 struct ServiceUnavailableError: LocalizedError, Sendable {
     let reason: String
 
@@ -67,6 +72,8 @@ struct AudioCaptureResult: Equatable, Sendable {
 struct UsageSnapshot: Equatable, Sendable {
     let weeklyDictationLimit: Int
     let usedDictations: Int
+    let weeklyTransformLimit: Int?
+    let usedTransforms: Int
     let resetsAt: Date
 
     var remainingDictations: Int {
@@ -75,6 +82,16 @@ struct UsageSnapshot: Equatable, Sendable {
 
     var hasRemainingDictations: Bool {
         remainingDictations > 0
+    }
+
+    var remainingTransforms: Int? {
+        guard let weeklyTransformLimit else { return nil }
+        return max(weeklyTransformLimit - usedTransforms, 0)
+    }
+
+    var hasRemainingTransforms: Bool {
+        guard let remainingTransforms else { return true }
+        return remainingTransforms > 0
     }
 }
 

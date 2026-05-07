@@ -77,8 +77,10 @@ actor MockServiceState {
 
     init(
         usage: UsageSnapshot = UsageSnapshot(
-            weeklyDictationLimit: AppModel.SpendPolicy.freeWeeklyDictationLimit,
+            weeklyDictationLimit: FlowTypeSpendPolicy.freeWeeklyDictationLimit,
             usedDictations: 2,
+            weeklyTransformLimit: 2,
+            usedTransforms: 0,
             resetsAt: Calendar.current.date(byAdding: .day, value: 7, to: .now) ?? .now
         ),
         history: [HistoryItem] = []
@@ -105,16 +107,21 @@ actor MockServiceState {
 
     func resetUsage() {
         usage = UsageSnapshot(
-            weeklyDictationLimit: AppModel.SpendPolicy.freeWeeklyDictationLimit,
+            weeklyDictationLimit: FlowTypeSpendPolicy.freeWeeklyDictationLimit,
             usedDictations: 0,
+            weeklyTransformLimit: 0,
+            usedTransforms: 0,
             resetsAt: Calendar.current.date(byAdding: .day, value: 7, to: .now) ?? .now
         )
     }
 
     func incrementUsage() -> UsageSnapshot {
+        let nextDictations = min(usage.usedDictations + 1, usage.weeklyDictationLimit)
         usage = UsageSnapshot(
             weeklyDictationLimit: usage.weeklyDictationLimit,
-            usedDictations: min(usage.usedDictations + 1, usage.weeklyDictationLimit),
+            usedDictations: nextDictations,
+            weeklyTransformLimit: nextDictations,
+            usedTransforms: usage.usedTransforms,
             resetsAt: usage.resetsAt
         )
         return usage

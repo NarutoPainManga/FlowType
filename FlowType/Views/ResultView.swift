@@ -73,7 +73,15 @@ struct ResultView: View {
     }
 
     private var transformHint: String {
+        if !appModel.usageSnapshot.hasRemainingTransforms {
+            return "You've used the free AI rewrites unlocked by this week's completed dictations."
+        }
+
         if appModel.remainingFreeTransformsForCurrentDraft > 0 {
+            if let remainingThisWeek = appModel.usageSnapshot.remainingTransforms {
+                return "\(appModel.remainingFreeTransformsForCurrentDraft) AI rewrite left for this draft. \(remainingThisWeek) free rewrite left this week."
+            }
+
             return "\(appModel.remainingFreeTransformsForCurrentDraft) AI rewrite left for this draft."
         }
 

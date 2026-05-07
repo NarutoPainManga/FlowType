@@ -332,12 +332,16 @@ private struct TransformResultDTO: Codable, Sendable {
 private struct UsageSnapshotDTO: Codable, Sendable {
     let dictationsLimit: Int?
     let dictationsUsed: Int
+    let transformsLimit: Int?
+    let transformsUsed: Int?
     let weekStart: String
 
     var usageSnapshot: UsageSnapshot {
         UsageSnapshot(
             weeklyDictationLimit: dictationsLimit ?? .max,
             usedDictations: dictationsUsed,
+            weeklyTransformLimit: transformsLimit,
+            usedTransforms: transformsUsed ?? 0,
             resetsAt: Self.weekStartFormatter.date(from: weekStart) ?? .now
         )
     }
@@ -356,9 +360,12 @@ private extension FlowTypeAPIResponse {
     var remoteError: RemoteFlowTypeServiceError {
         let rawMessage = String(data: data, encoding: .utf8)?
             .trimmingCharacters(in: .whitespacesAndNewlines)
+        let decodedMessage = try? JSONDecoder().decode(RemoteErrorEnvelope.self, from: data).error.message
 
         let message: String
-        if let rawMessage, !rawMessage.isEmpty {
+        if let decodedMessage, !decodedMessage.isEmpty {
+            message = decodedMessage
+        } else if let rawMessage, !rawMessage.isEmpty {
             message = rawMessage
         } else {
             message = "No response body returned."
@@ -366,6 +373,14 @@ private extension FlowTypeAPIResponse {
 
         return .requestFailed(statusCode: statusCode, message: message)
     }
+}
+
+private struct RemoteErrorEnvelope: Decodable {
+    struct ErrorPayload: Decodable {
+        let message: String
+    }
+
+    let error: ErrorPayload
 }
 
 private extension TransformIntent {

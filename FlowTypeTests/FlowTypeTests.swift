@@ -5,6 +5,7 @@
 //  Created by Pain on 4/22/26.
 //
 
+import Foundation
 import Testing
 @testable import FlowType
 
@@ -48,6 +49,13 @@ struct FlowTypeTests {
         let appModel = AppModel(services: .mock(), shouldBootstrap: false)
         appModel.hasAcceptedThirdPartyAIConsent = true
         appModel.currentPolishedText = "Quick update: we can ship on Friday."
+        appModel.usageSnapshot = UsageSnapshot(
+            weeklyDictationLimit: FlowTypeSpendPolicy.freeWeeklyDictationLimit,
+            usedDictations: 1,
+            weeklyTransformLimit: 1,
+            usedTransforms: 0,
+            resetsAt: .now
+        )
 
         appModel.transformCurrentText(using: .shorter)
         try await Task.sleep(for: .milliseconds(100))
